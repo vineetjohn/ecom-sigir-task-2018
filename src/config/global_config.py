@@ -1,2 +1,2 @@
 logger_name = "ecom"
-log_level = "DEBUG"
+log_level = "INFO"
