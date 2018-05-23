@@ -17,7 +17,6 @@ def generate_taxonomy(input_file_path, taxonomy_save_path):
             categories = category_string.strip().split('>')
             taxonomy.add_categories(categories)
 
-    logger.debug(taxonomy)
     with open(taxonomy_save_path, 'wb') as taxonomy_file:
         pickle.dump(taxonomy, taxonomy_file)
         logger.info("Saved taxonomy to {}".format(taxonomy_save_path))

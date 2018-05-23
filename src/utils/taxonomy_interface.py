@@ -13,8 +13,9 @@ class Taxonomy:
                 category_node = TaxonomyNode(category)
                 category_node.parent = parent
                 parent.children[category] = category_node
+                self.nodes[category] = category_node
             else:
-                category_node = parent.children[category]
+                category_node = self.nodes[category]
             parent = category_node
 
 
