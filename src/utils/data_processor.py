@@ -1,21 +1,21 @@
+import logging
 import re
-import spacy
 
+import spacy
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from spacy.lang.en import English
-from spacy.lang.en.stop_words import STOP_WORDS
-from sklearn.feature_extraction.text import TfidfVectorizer
+
+from src.config import global_config, stopwords
+
+logger = logging.getLogger(global_config.logger_name)
 
 
 def is_valid_token(token):
-    if len(token) < 3 or token in STOP_WORDS:
-        return False
-
-    return True
+    return len(token) >= 3 and token not in stopwords.stop_words
 
 
 def clean_product(string, tokenizer):
-
-    string = re.sub(r"[^A-Za-z(),!?\'\`]", " ", string)
+    string = re.sub(r"[^A-Za-z(),!?\'`]", " ", string)
     string = re.sub(r",", "", string)
     string = re.sub(r"!", "", string)
     string = re.sub(r"\(", "", string)
@@ -39,7 +39,9 @@ def get_data(input_file_path):
         for line in input_file:
             [product, category_string] = line.strip().split('\t')
             categories = category_string.strip().split('>')
-            products.append(clean_product(product, tokenizer))
+            cleaned_product = clean_product(product, tokenizer)
+            logger.info("original: {}, cleaned: {}".format(product, cleaned_product))
+            products.append(cleaned_product)
             labels.append(categories[-1])
 
     return products, labels
@@ -48,5 +50,12 @@ def get_data(input_file_path):
 def get_tfidf_features(products):
     tfidf_vectorizer = TfidfVectorizer(input=products, strip_accents='unicode')
     features = tfidf_vectorizer.fit_transform(products)
+
+    return features
+
+
+def get_count_features(products):
+    count_vectorizer = CountVectorizer(input=products, strip_accents='unicode')
+    features = count_vectorizer.fit_transform(products)
 
     return features
