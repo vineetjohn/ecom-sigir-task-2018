@@ -25,8 +25,8 @@ class TaxonomyNode:
         self.children = dict()
 
     def __repr__(self):
-        representation = "{}=(".format(self.id)
+        representation = ["{}=(".format(self.id)]
         for child in self.children:
-            representation += "{}, ".format(self.children[child])
-        representation += ")"
-        return representation
+            representation.append("{}, ".format(self.children[child]))
+        representation.append(")")
+        return "".join(representation)
