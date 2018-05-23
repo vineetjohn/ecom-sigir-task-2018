@@ -5,13 +5,14 @@ import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from spacy.lang.en import English
 
-from src.config import global_config, stopwords
+from src.config import global_config
+from src.utils import stopword_aggregator
 
 logger = logging.getLogger(global_config.logger_name)
 
 
 def is_valid_token(token):
-    return len(token) >= 3 and token not in stopwords.stop_words
+    return len(token) >= 3 and token not in stopword_aggregator.custom_stopwords
 
 
 def clean_product(string, tokenizer):
@@ -25,7 +26,7 @@ def clean_product(string, tokenizer):
     string = string.strip().lower()
 
     tokens = tokenizer(string)
-    tokens = [str(x) for x in tokens if is_valid_token(x)]
+    tokens = [str(x) for x in tokens if is_valid_token(str(x))]
 
     return " ".join(tokens)
 
