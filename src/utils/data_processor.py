@@ -30,6 +30,7 @@ def get_training_data(input_file_path):
     spacy_nlp = spacy.load("en")
     tokenizer = English().Defaults.create_tokenizer(spacy_nlp)
 
+    max_category_depth = 1
     with open(input_file_path) as input_file:
         i = 0
         for line in input_file:
@@ -38,6 +39,7 @@ def get_training_data(input_file_path):
             i += 1
             [product, category_string] = line.strip().split('\t')
             categories = category_string.strip().split('>')
+            max_category_depth = len(categories) if len(categories) > max_category_depth else max_category_depth
             cleaned_product = clean_product(product, tokenizer)
             if cleaned_product:
                 logger.debug("original: {}, cleaned: {}".format(product, cleaned_product))
@@ -45,6 +47,7 @@ def get_training_data(input_file_path):
                 labels.append(categories[-1])
             else:
                 logger.error("skipped product {}".format(product))
+    logger.info("max_category_depth: {}".format(max_category_depth))
 
     return products, labels
 
