@@ -40,7 +40,7 @@ def train_model(train_file_path, test_file_path, model_save_path, test_vectors_s
 
     classifier = SGDClassifier(n_jobs=8)
     start_index = 0
-    while start_index < num_train:
+    while start_index < num_train - 1:
         logger.info("start_index: {}".format(start_index))
         end_index = min(start_index + global_config.minibatch_size, num_train)
         classifier.partial_fit(X=features_train[start_index:end_index],
@@ -48,7 +48,7 @@ def train_model(train_file_path, test_file_path, model_save_path, test_vectors_s
                                classes=label_set)
         start_index = end_index
 
-        logger.info("running validaiton")
+        logger.info("running validation")
         predictions = classifier.predict(features_test)
         logger.debug("predictions: {}".format(predictions))
 

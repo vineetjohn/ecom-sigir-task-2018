@@ -18,9 +18,18 @@ def test_model(model_path, test_vectors_path, predictions_path):
         features = pickle.load(test_vectors_file)
         logger.info("loaded test vectors into memory")
 
-    predictions = classifier.predict(features)
+    num_test = features.shape[0]
+    start_index = 0
+    all_predictions = list()
+    while start_index < num_test:
+        logger.info("start_index: {}".format(start_index))
+        end_index = min(start_index + global_config.minibatch_size, num_test)
+        predictions = classifier.predict(features[start_index:end_index])
+        all_predictions.extend(predictions)
+        start_index = end_index
+
     with open(predictions_path, 'w') as predictions_file:
-        for prediction in predictions:
+        for prediction in all_predictions:
             predictions_file.write("{}\n".format(prediction))
     logger.info("predictions written to file {}".format(predictions_path))
 

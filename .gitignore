@@ -108,4 +108,5 @@ data/
 .idea/
 test.py
 models/
+logs/
 
