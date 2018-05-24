@@ -29,8 +29,9 @@ def train_model(train_file_path, test_file_path, model_save_path, test_vectors_s
         logger.info("saved test vectors")
 
     logger.debug("products_train: {}".format(products_train))
-    logger.info("product_count: {}".format(len(products_train)))
+    logger.info("product_count: {}".format(num_train))
     logger.info("features: {}".format(features.shape))
+    logger.info("labels: {}".format(len(labels)))
     del products_train, products_test, all_products
 
     label_set = list(set(labels))
@@ -38,11 +39,14 @@ def train_model(train_file_path, test_file_path, model_save_path, test_vectors_s
     features_train, features_test, labels_train, labels_test = \
         train_test_split(features[:num_train], labels, test_size=0.01)
 
+    num_train = features_train.shape[0]
+
     classifier = SGDClassifier(n_jobs=8)
     start_index = 0
-    while start_index < num_train - 1:
-        logger.info("start_index: {}".format(start_index))
+    while start_index < num_train:
         end_index = min(start_index + global_config.minibatch_size, num_train)
+        logger.info("start_index: {}".format(start_index))
+        logger.info("end_index: {}".format(end_index))
         classifier.partial_fit(X=features_train[start_index:end_index],
                                y=labels_train[start_index:end_index],
                                classes=label_set)
