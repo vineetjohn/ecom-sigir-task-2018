@@ -17,7 +17,7 @@
 --train-file-path ${TRAIN_FILE_PATH} \
 --test-file-path ${TEST_FILE_PATH} \
 --model-save-path ${MODEL_SAVE_PATH} \
---test-vectors-save-path ${TEST_VECTORS_SAVE_PATH}
+--vectorizer-save-path ${VECTORIZER_SAVE_PATH}
 ```
 
 
@@ -26,6 +26,7 @@
 ```
 ./scripts/test_classifier.sh \
 --model-save-path ${MODEL_SAVE_PATH} \
---test-vectors-save-path ${TEST_VECTORS_SAVE_PATH} \
+--vectorizer-save-path ${VECTORIZER_SAVE_PATH} \
 --predictions-save-path ${PREDICTIONS_SAVE_PATH}
 ```
+
