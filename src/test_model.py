@@ -18,7 +18,7 @@ def convert_prediction_to_hierarchy(prediction, taxonomy):
     return hierarchy
 
 
-def test_model(model_path, test_vectors_path, predictions_path, taxonomy_file_path):
+def test_model(model_path, test_file_path, test_vectors_path, predictions_path, taxonomy_file_path):
     with open(model_path, 'rb') as model_file:
         classifier = pickle.load(model_file)
         logger.info("loaded model into memory")
@@ -37,11 +37,17 @@ def test_model(model_path, test_vectors_path, predictions_path, taxonomy_file_pa
         all_predictions.extend(predictions)
         start_index = end_index
 
-    with open(predictions_path, 'w') as predictions_file, open(taxonomy_file_path, 'rb') as taxonomy_file:
+    category_paths = list()
+    with open(taxonomy_file_path, 'rb') as taxonomy_file:
         taxonomy = pickle.load(taxonomy_file)
         logger.info("Loaded taxonomy")
         for prediction in all_predictions:
-            predictions_file.write("{}\n".format(convert_prediction_to_hierarchy(prediction, taxonomy)))
+            category_paths.append(convert_prediction_to_hierarchy(prediction, taxonomy))
+
+    with open(test_file_path, 'r') as test_file, open(predictions_path, 'w') as predictions_file:
+        for product, category_path in zip(test_file, category_paths):
+            predictions_file.write("{}\t{}\n".format(product.strip(), category_path))
+
     logger.info("predictions written to file {}".format(predictions_path))
 
 
@@ -52,12 +58,13 @@ def main(args):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-save-path", type=str, required=True)
+    parser.add_argument("--test-file-path", type=str, required=True)
     parser.add_argument("--test-vectors-save-path", type=str, required=True)
     parser.add_argument("--predictions-save-path", type=str, required=True)
     parser.add_argument("--taxonomy-file-path", type=str, required=True)
     options = vars(parser.parse_args(args=args))
     logger.debug("arguments: {}".format(options))
-    test_model(options['model_save_path'], options['test_vectors_save_path'],
+    test_model(options['model_save_path'], options['test_file_path'], options['test_vectors_save_path'],
                options['predictions_save_path'], options['taxonomy_file_path'])
 
 
