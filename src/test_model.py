@@ -9,7 +9,16 @@ from src.utils import logging_inferface
 logger = logging.getLogger(global_config.logger_name)
 
 
-def test_model(model_path, test_vectors_path, predictions_path):
+def convert_prediction_to_hierarchy(prediction, taxonomy):
+    hierarchy = prediction.copy()
+    prediction_node = taxonomy.nodes[prediction]
+    while prediction_node.parent.id != -1:
+        prediction_node = prediction_node.parent
+        hierarchy = "{}>{}".format(prediction_node.id, hierarchy)
+    return hierarchy
+
+
+def test_model(model_path, test_vectors_path, predictions_path, taxonomy_file_path):
     with open(model_path, 'rb') as model_file:
         classifier = pickle.load(model_file)
         logger.info("loaded model into memory")
@@ -28,9 +37,11 @@ def test_model(model_path, test_vectors_path, predictions_path):
         all_predictions.extend(predictions)
         start_index = end_index
 
-    with open(predictions_path, 'w') as predictions_file:
+    with open(predictions_path, 'w') as predictions_file, open(taxonomy_file_path, 'rb') as taxonomy_file:
+        taxonomy = pickle.load(taxonomy_file)
+        logger.info("Loaded taxonomy")
         for prediction in all_predictions:
-            predictions_file.write("{}\n".format(prediction))
+            predictions_file.write("{}\n".format(convert_prediction_to_hierarchy(prediction, taxonomy)))
     logger.info("predictions written to file {}".format(predictions_path))
 
 
@@ -43,9 +54,11 @@ def main(args):
     parser.add_argument("--model-save-path", type=str, required=True)
     parser.add_argument("--test-vectors-save-path", type=str, required=True)
     parser.add_argument("--predictions-save-path", type=str, required=True)
+    parser.add_argument("--taxonomy-file-path", type=str, required=True)
     options = vars(parser.parse_args(args=args))
     logger.debug("arguments: {}".format(options))
-    test_model(options['model_save_path'], options['test_vectors_save_path'], options['predictions_save_path'])
+    test_model(options['model_save_path'], options['test_vectors_save_path'],
+               options['predictions_save_path'], options['taxonomy_file_path'])
 
 
 if __name__ == '__main__':
