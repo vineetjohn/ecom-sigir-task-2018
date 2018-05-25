@@ -44,7 +44,7 @@ def get_training_data(input_file_path):
             if cleaned_product:
                 logger.debug("original: {}, cleaned: {}".format(product, cleaned_product))
                 products.append(cleaned_product)
-                labels.append(categories[-1])
+                labels.append(category_string)
             else:
                 logger.error("skipped product {}".format(product))
     logger.info("max_category_depth: {}".format(max_category_depth))

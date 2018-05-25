@@ -14,30 +14,29 @@ from src.utils import logging_inferface, data_processor
 logger = logging.getLogger(global_config.logger_name)
 
 
-def train_model(train_file_path, test_file_path, model_save_path, test_vectors_save_path):
+def train_model(train_file_path, model_save_path, vectorizer_save_path):
     products_train, labels = data_processor.get_training_data(train_file_path)
-    products_test = data_processor.get_test_data(test_file_path)
-    all_products = products_train + products_test
     num_train = len(products_train)
 
-    vectorizer = TfidfVectorizer(input=all_products, strip_accents='unicode')
-
-    features = vectorizer.fit_transform(all_products)
+    vectorizer = TfidfVectorizer(strip_accents='unicode')
+    vectorizer.fit_transform(products_train)
     logger.info("vectorized products")
-    with open(test_vectors_save_path, 'wb') as test_vectors_file:
-        pickle.dump(features[num_train:], test_vectors_file)
-        logger.info("saved test vectors")
+    with open(vectorizer_save_path, 'wb') as vectorizer_file:
+        pickle.dump(vectorizer, vectorizer_file)
+        logger.info("saved vectorizer")
 
     logger.debug("products_train: {}".format(products_train))
     logger.info("product_count: {}".format(num_train))
-    logger.info("features: {}".format(features.shape))
     logger.info("labels: {}".format(len(labels)))
-    del products_train, products_test, all_products
+
+    features = vectorizer.transform(products_train)
+    logger.info("features: {}".format(features.shape))
+    del products_train, vectorizer
 
     label_set = list(set(labels))
     scores = list()
     features_train, features_test, labels_train, labels_test = \
-        train_test_split(features[:num_train], labels, test_size=0.01)
+        train_test_split(features, labels, test_size=0.01)
 
     num_train = features_train.shape[0]
 
@@ -61,7 +60,6 @@ def train_model(train_file_path, test_file_path, model_save_path, test_vectors_s
         logger.info("validation f1-score: {}".format(score))
         scores.append(score)
 
-    # logger.info("aggregate validation f1-score: {}".format(statistics.mean(scores)))
     logger.info("saving model ...")
     with open(model_save_path, 'wb') as model_save_file:
         pickle.dump(classifier, model_save_file)
@@ -75,13 +73,12 @@ def main(args):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-file-path", type=str, required=True)
-    parser.add_argument("--test-file-path", type=str, required=True)
     parser.add_argument("--model-save-path", type=str, required=True)
-    parser.add_argument("--test-vectors-save-path", type=str, required=True)
+    parser.add_argument("--vectorizer-save-path", type=str, required=True)
     options = vars(parser.parse_args(args=args))
     logger.debug("arguments: {}".format(options))
-    train_model(options['train_file_path'], options['test_file_path'], options['model_save_path'],
-                options['test_vectors_save_path'])
+
+    train_model(options['train_file_path'], options['model_save_path'], options['vectorizer_save_path'])
 
 
 if __name__ == '__main__':
