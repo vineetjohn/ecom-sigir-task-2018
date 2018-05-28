@@ -17,6 +17,12 @@ def generate_taxonomy(input_file_path, taxonomy_save_path):
             categories = category_string.strip().split('>')
             taxonomy.add_categories(categories)
 
+    total_classes = 0
+    for level in taxonomy.level_nodes:
+        total_classes += len(taxonomy.level_nodes[level])
+        logger.info("{} nodes at level {}".format(len(taxonomy.level_nodes[level]), level))
+    logger.info("total classes: {}".format(total_classes))
+
     with open(taxonomy_save_path, 'wb') as taxonomy_file:
         pickle.dump(taxonomy, taxonomy_file)
         logger.info("Saved taxonomy to {}".format(taxonomy_save_path))
@@ -24,7 +30,8 @@ def generate_taxonomy(input_file_path, taxonomy_save_path):
 
 def main(args):
     global logger
-    logger = logging_inferface.setup_custom_logger(global_config.logger_name, global_config.log_level)
+    logger = logging_inferface.setup_custom_logger(
+        global_config.logger_name, global_config.log_level)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-file-path", type=str, required=True)
