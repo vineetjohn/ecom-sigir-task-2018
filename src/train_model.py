@@ -60,10 +60,10 @@ def train_model(train_file_path, model_save_path, vectorizer_save_path, epochs):
                              average='weighted')
             logger.info("validation f1-score: {}".format(score))
 
-    logger.info("saving model ...")
-    with open(model_save_path, 'wb') as model_save_file:
-        pickle.dump(classifier, model_save_file)
-    logger.info("model saved to {}".format(model_save_path))
+        logger.info("saving model ...")
+        with open(model_save_path, 'wb') as model_save_file:
+            pickle.dump(classifier, model_save_file)
+        logger.info("model saved to {}".format(model_save_path))
 
 
 def main(args):
