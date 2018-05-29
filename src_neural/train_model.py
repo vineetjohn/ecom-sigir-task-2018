@@ -1,6 +1,5 @@
 import argparse
 import logging
-import re
 import sys
 from typing import Any
 
@@ -9,7 +8,7 @@ from spacy.lang.en import English
 from torchtext import data
 
 from src_neural.config.global_config import gconf
-from src_neural.utils import logging_inferface, stopword_aggregator, data_processor
+from src_neural.utils import logging_inferface, data_processor
 
 logger = logging.getLogger(gconf.logger_name)
 
@@ -19,7 +18,7 @@ class Options(argparse.Namespace):
         super().__init__(**kwargs)
         self.train_file_path = None
         self.model_save_path = None
-        self.epochs = None
+        self.num_epochs = None
 
 
 def train_model(train_file_path, model_save_path, epochs):
@@ -53,12 +52,12 @@ def main(args):
     parser.add_argument("--train-file-path", type=str, required=True)
     parser.add_argument("--model-save-path", type=str, required=True)
     parser.add_argument("--vectorizer-save-path", type=str, required=True)
-    parser.add_argument("--epochs", type=int, required=True)
+    parser.add_argument("--num-epochs", type=int, required=True)
     parser.parse_known_args(args=args, namespace=options)
     logger.info("options: {}".format(options.__dict__))
     logger.info("gconf: {}".format(gconf.__dict__))
 
-    train_model(options.train_file_path, options.model_save_path, options.epochs)
+    train_model(options.train_file_path, options.model_save_path, options.num_epochs)
 
 
 if __name__ == '__main__':
