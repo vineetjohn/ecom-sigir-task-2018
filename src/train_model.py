@@ -14,7 +14,7 @@ from src.utils import logging_inferface, data_processor
 logger = logging.getLogger(global_config.logger_name)
 
 
-def train_model(train_file_path, model_save_path, vectorizer_save_path):
+def train_model(train_file_path, model_save_path, vectorizer_save_path, epochs):
     products_train, labels = data_processor.get_training_data(train_file_path)
     num_train = len(products_train)
 
@@ -34,31 +34,31 @@ def train_model(train_file_path, model_save_path, vectorizer_save_path):
     del products_train, vectorizer
 
     label_set = list(set(labels))
-    scores = list()
     features_train, features_test, labels_train, labels_test = \
         train_test_split(features, labels, test_size=0.01)
 
-    num_train = features_train.shape[0]
-
     classifier = SGDClassifier(n_jobs=8)
-    start_index = 0
-    while start_index < num_train:
-        end_index = min(start_index + global_config.minibatch_size, num_train)
-        logger.info("start_index: {}".format(start_index))
-        logger.info("end_index: {}".format(end_index))
-        classifier.partial_fit(X=features_train[start_index:end_index],
-                               y=labels_train[start_index:end_index],
-                               classes=label_set)
-        start_index = end_index
+    for epoch in range(1, epochs + 1):
+        logger.info("epoch: {}".format(epoch))
+        start_index = 0
 
-        logger.info("running validation")
-        predictions = classifier.predict(features_test)
-        logger.debug("predictions: {}".format(predictions))
+        num_train = features_train.shape[0]
+        while start_index < num_train:
+            end_index = min(start_index + global_config.minibatch_size, num_train)
+            logger.info("start_index: {}".format(start_index))
+            logger.info("end_index: {}".format(end_index))
+            classifier.partial_fit(X=features_train[start_index:end_index],
+                                   y=labels_train[start_index:end_index],
+                                   classes=label_set)
+            start_index = end_index
 
-        score = f1_score(y_pred=predictions, y_true=labels_test,
-                         average='weighted')
-        logger.info("validation f1-score: {}".format(score))
-        scores.append(score)
+            logger.info("running validation")
+            predictions = classifier.predict(features_test)
+            logger.debug("predictions: {}".format(predictions))
+
+            score = f1_score(y_pred=predictions, y_true=labels_test,
+                             average='weighted')
+            logger.info("validation f1-score: {}".format(score))
 
     logger.info("saving model ...")
     with open(model_save_path, 'wb') as model_save_file:
@@ -75,10 +75,12 @@ def main(args):
     parser.add_argument("--train-file-path", type=str, required=True)
     parser.add_argument("--model-save-path", type=str, required=True)
     parser.add_argument("--vectorizer-save-path", type=str, required=True)
+    parser.add_argument("--epochs", type=int, required=True)
     options = vars(parser.parse_args(args=args))
     logger.debug("arguments: {}".format(options))
 
-    train_model(options['train_file_path'], options['model_save_path'], options['vectorizer_save_path'])
+    train_model(options['train_file_path'], options['model_save_path'], options['vectorizer_save_path'],
+                options['epochs'])
 
 
 if __name__ == '__main__':
