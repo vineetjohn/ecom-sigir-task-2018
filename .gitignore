@@ -107,6 +107,6 @@ venv.bak/
 data/
 .idea/
 test.py
-models/
+saved-models/
 logs/
 
