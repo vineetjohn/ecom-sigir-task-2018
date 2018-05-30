@@ -74,6 +74,7 @@ def train_model(train_file_path, model_save_path, num_epochs):
 
         all_predictions = torch.LongTensor([]).cuda()
         all_labels = torch.LongTensor([]).cuda()
+        val_iterator.init_epoch()
         for i, val_data in enumerate(val_iterator):
             text_sequences, labels = val_data.product, val_data.category
             bow_representations = data_processor.get_bow_representation(
