@@ -20,6 +20,6 @@ class NeuralClassifier(torch.nn.Module):
         x = self.fc2(x)
         x = self.dropout(x)
         x = self.fc3(x)
-        logits = torch.nn.functional.log_softmax(x)
+        logits = torch.nn.functional.log_softmax(input=x, dim=0)
 
         return logits

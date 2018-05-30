@@ -51,12 +51,9 @@ def test_model(model_save_path, test_file_path, predictions_path):
 
         all_predictions = torch.cat([all_predictions, indices])
 
-    print("all_predictions:", all_predictions.size())
-
-    # with open(test_file_path, 'r') as test_file, open(predictions_path, 'w') as predictions_file:
-    #     for product, prediction in zip(test_file, all_predictions):
-    #         predictions_file.write("{}\t{}\n".format(product.strip(), prediction))
-
+    with open(test_file_path, 'r') as test_file, open(predictions_path, 'w') as predictions_file:
+        for product, prediction in zip(test_file, all_predictions):
+            predictions_file.write("{}\t{}\n".format(product.strip(), category_field.vocab.itos[prediction]))
     logger.info("predictions written to file {}".format(predictions_path))
 
 
