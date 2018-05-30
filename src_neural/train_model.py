@@ -49,7 +49,10 @@ def train_model(train_file_path, model_save_path, num_epochs):
 
     with open(os.path.join(model_save_path, gconf.vocab_filename), 'wb') as vocab_file:
         pickle.dump(product_field, vocab_file)
-    logger.info("saved vocab to {}".format(model_save_path))
+    logger.info("saved vocab")
+    with open(os.path.join(model_save_path, gconf.labels_filename), 'wb') as labels_file:
+        pickle.dump(category_field, labels_file)
+    logger.info("saved labels")
 
     model = NeuralClassifier(len(product_field.vocab), len(category_field.vocab))
     model.cuda()
