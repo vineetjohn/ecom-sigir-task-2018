@@ -27,6 +27,25 @@ class Options(argparse.Namespace):
         self.num_epochs = None
 
 
+def run_validation(model, val_iterator, product_field):
+    all_predictions = torch.LongTensor([]).cuda()
+    all_labels = torch.LongTensor([]).cuda()
+    val_iterator.init_epoch()
+    for i, val_data in enumerate(val_iterator):
+        text_sequences, labels = val_data.product, val_data.category
+        bow_representations = data_processor.get_bow_representation(
+            text_sequences, len(product_field.vocab))
+        logits = model(bow_representations)
+        _, indices = torch.max(logits, 1)
+
+        all_predictions = torch.cat([all_predictions, indices])
+        all_labels = torch.cat([all_labels, labels])
+
+    validation_accuracy = f1_score(y_pred=all_predictions, y_true=all_labels,
+                                   average='weighted')
+    logger.info("validation_accuracy: {}".format(validation_accuracy))
+
+
 def train_model(train_file_path, model_save_path, num_epochs):
     spacy_nlp = spacy.load("en")
     spacy_tokenizer = English().Defaults.create_tokenizer(spacy_nlp)
@@ -43,7 +62,7 @@ def train_model(train_file_path, model_save_path, num_epochs):
     logger.info("vocab size: {}".format(len(product_field.vocab)))
 
     train_iterator = data.Iterator(
-        dataset=train_dataset, batch_size=mconf.minibatch_size, repeat=False)
+        dataset=train_dataset, batch_size=mconf.minibatch_size, repeat=False, shuffle=True)
     val_iterator = data.Iterator(
         dataset=val_dataset, batch_size=mconf.minibatch_size, repeat=False)
 
@@ -72,22 +91,7 @@ def train_model(train_file_path, model_save_path, num_epochs):
             loss.backward()
             optimizer.step()
 
-        all_predictions = torch.LongTensor([]).cuda()
-        all_labels = torch.LongTensor([]).cuda()
-        val_iterator.init_epoch()
-        for i, val_data in enumerate(val_iterator):
-            text_sequences, labels = val_data.product, val_data.category
-            bow_representations = data_processor.get_bow_representation(
-                text_sequences, len(product_field.vocab))
-            logits = model(bow_representations)
-            _, indices = torch.max(logits, 1)
-
-            all_predictions = torch.cat([all_predictions, indices])
-            all_labels = torch.cat([all_labels, labels])
-
-        validation_accuracy = f1_score(y_pred=all_predictions, y_true=all_labels,
-                                       average='weighted')
-        logger.info("validation_accuracy: {}".format(validation_accuracy))
+        run_validation(model, val_iterator, product_field)
 
         torch.save(model.state_dict(), os.path.join(model_save_path, gconf.model_filename))
         logger.info("saved model to {}".format(model_save_path))
