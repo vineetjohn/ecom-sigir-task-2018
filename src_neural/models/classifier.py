@@ -11,15 +11,19 @@ class NeuralClassifier(torch.nn.Module):
         self.fc1 = torch.nn.Linear(vocab_size, mconf.layer_1_size)
         self.fc2 = torch.nn.Linear(mconf.layer_1_size, mconf.layer_2_size)
         self.fc3 = torch.nn.Linear(mconf.layer_2_size, num_classes)
+        self.relu = torch.nn.ReLU()
+        self.softmax = torch.nn.LogSoftmax()
 
     def forward(self, x):
         x = torch.autograd.Variable(x)
-        x = self.dropout(x)
         x = self.fc1(x)
+        x = self.relu(x)
         x = self.dropout(x)
         x = self.fc2(x)
+        x = self.relu(x)
         x = self.dropout(x)
         x = self.fc3(x)
-        logits = torch.nn.functional.log_softmax(input=x, dim=0)
+        x = self.relu(x)
+        logits = self.softmax(x)
 
         return logits
