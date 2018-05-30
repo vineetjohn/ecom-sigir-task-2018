@@ -12,7 +12,7 @@ class NeuralClassifier(torch.nn.Module):
         self.fc2 = torch.nn.Linear(mconf.layer_1_size, mconf.layer_2_size)
         self.fc3 = torch.nn.Linear(mconf.layer_2_size, num_classes)
         self.relu = torch.nn.ReLU()
-        self.softmax = torch.nn.LogSoftmax()
+        self.softmax = torch.nn.LogSoftmax(dim=0)
 
     def forward(self, x):
         x = torch.autograd.Variable(x)

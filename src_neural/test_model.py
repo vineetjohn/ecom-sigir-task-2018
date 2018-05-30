@@ -43,6 +43,7 @@ def test_model(model_save_path, test_file_path, predictions_path):
 
     all_predictions = torch.LongTensor([]).cuda()
     for i, test_data in enumerate(test_iterator):
+        logger.info("predicting samples from index: {}".format(i * mconf.minibatch_size))
         text_sequences = test_data.product
         bow_representations = data_processor.get_bow_representation(
             text_sequences, len(product_field.vocab))
