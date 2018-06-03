@@ -9,8 +9,7 @@ class NeuralClassifier(torch.nn.Module):
         super().__init__()
         self.dropout = torch.nn.Dropout(mconf.dropout)
         self.fc1 = torch.nn.Linear(vocab_size, mconf.layer_1_size)
-        self.fc2 = torch.nn.Linear(mconf.layer_1_size, mconf.layer_2_size)
-        self.fc3 = torch.nn.Linear(mconf.layer_2_size, num_classes)
+        self.fc2 = torch.nn.Linear(mconf.layer_1_size, num_classes)
         self.relu = torch.nn.ReLU()
         self.softmax = torch.nn.LogSoftmax(dim=0)
 
@@ -22,8 +21,6 @@ class NeuralClassifier(torch.nn.Module):
         x = self.fc2(x)
         x = self.relu(x)
         x = self.dropout(x)
-        x = self.fc3(x)
-        x = self.relu(x)
         logits = self.softmax(x)
 
         return logits

@@ -28,6 +28,7 @@ class Options(argparse.Namespace):
 
 
 def run_validation(model, val_iterator, product_field):
+    model.eval()
     all_predictions = torch.LongTensor([]).cuda()
     all_labels = torch.LongTensor([]).cuda()
     val_iterator.init_epoch()
@@ -76,8 +77,8 @@ def train_model(train_file_path, model_save_path, num_epochs):
     model = NeuralClassifier(len(product_field.vocab), len(category_field.vocab))
     model.cuda()
     optimizer = torch.optim.Adam(model.parameters(), lr=mconf.learning_rate)
-    model.train()
     for epoch in range(1, num_epochs + 1):
+        model.train()
         train_iterator.init_epoch()
         for i, train_data in enumerate(train_iterator):
             text_sequences, labels = train_data.product, train_data.category
